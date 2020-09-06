@@ -1,0 +1,23 @@
+/*contains essential formatting. Always loaded.*/
+body {
+  font-family: sans-serif;
+}
+/*messages*/
+div.msg {
+  border-style: solid;
+  border-width: 1px;
+  padding: 3px;
+  margin: 3px;
+}
+div.error {
+  background-color: #FFDDDD;
+  border-color: #FF3333;
+}
+div.warning {
+  background-color: #FFDDAA;
+  border-color: #DDAA77;
+}
+div.notice {
+  background-color: #DDDDFF;
+  border-color: #AAAADD;
+}
