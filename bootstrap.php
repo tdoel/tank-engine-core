@@ -61,29 +61,25 @@ function te_error_handler($errno, $errstr, $errfile, $errline)
 //autoloader for files, such as config
 function te_require_once($file)
 {
-  $file_loaded = false;
+  //try to load the application version
+  $path = TE_DOCUMENT_ROOT . "/application/" . $file;
+  if(file_exists($path))
+  {
+    require_once $path;
+    return true;
+  }
 
   //try to load the framework version
   $path = TE_DOCUMENT_ROOT . "/framework/" . $file;
   if(file_exists($path))
   {
     require_once $path;
-    $file_loaded = true;
+    return true
   }
 
-  //try to load the application version
-  $path = TE_DOCUMENT_ROOT . "/application/" . $file;
-  if(file_exists($path))
-  {
-    require_once $path;
-    $file_loaded = true;
-  }
-
-  if(!$file_loaded)
-  {
-    //neither framework nor application available, throw an error
-    trigger_error("[Tank Engine] File $file was not available in either application or framework dir.");
-  }
+  //neither framework nor application available, throw an error
+  trigger_error("[Tank Engine] File $file was not available in either application or framework dir.");
+  return false;
 }
 function te_require($file)
 {
