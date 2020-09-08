@@ -81,32 +81,6 @@ function te_require_once($file)
   trigger_error("[Tank Engine] File $file was not available in either application or framework dir.");
   return false;
 }
-function te_require($file)
-{
-  $file_loaded = false;
-
-  //try to load the framework version
-  $path = TE_DOCUMENT_ROOT . "/framework/" . $file;
-  if(file_exists($path))
-  {
-    require $path;
-    $file_loaded = true;
-  }
-
-  //try to load the application version
-  $path = TE_DOCUMENT_ROOT . "/application/" . $file;
-  if(file_exists($path))
-  {
-    require $path;
-    $file_loaded = true;
-  }
-
-  if(!$file_loaded)
-  {
-    //neither framework nor application available, throw an error
-    trigger_error("[Tank Engine] File $file was not available in either application or framework dir.");
-  }
-}
 function te_get_absolute_path($file)
 {
   //check if the application version is available
