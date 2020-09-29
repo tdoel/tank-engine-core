@@ -72,7 +72,9 @@ class tank_engine
 
   public function redirect($controller = TE_DEFAULT_CONTROLLER, $action = TE_DEFAULT_ACTION, $args = null)
   {
+    $_SESSION["errors"] = static::get_errors();
     Header("Location: ".TE_URL_ROOT . "/" . $controller . "/" . $action . "/" . $args);
+    die;
   }
 
   //set and get the user. $user may be any type of Model that is used as 'user'
