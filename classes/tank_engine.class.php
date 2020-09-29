@@ -70,6 +70,11 @@ class tank_engine
     }
   }
 
+  public function redirect($controller = TE_DEFAULT_CONTROLLER, $action = TE_DEFAULT_ACTION, $args = null)
+  {
+    Header("Location: ".TE_URL_ROOT . "/" . $controller . "/" . $action . "/" . $args);
+  }
+
   //set and get the user. $user may be any type of Model that is used as 'user'
   public static function set_user($user)
   {
