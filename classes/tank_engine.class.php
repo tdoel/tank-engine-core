@@ -12,83 +12,12 @@ class tank_engine
 
   public static $title = "Tank Engine";
 
-  private $str_controller = "home";
-  private $str_action = "index";
-  private $args = null;
+  public $str_controller = "";
+  public $str_action = "";
+  public $args = null;
 
-  public function __construct($routes)
+  public function serve_request()
   {
-    //first, get the url from $_GET and load the relevant controller
-    if(isset($_GET["page"]))
-    {
-      $url = filter_var($_GET["page"],FILTER_SANITIZE_URL);
-
-      //trim URL of possible leading /
-      if(substr($url,0,1) == "/")
-      {
-        $url = substr($url,1);
-      }
-
-      $url_parts = explode("/",$url,3);
-
-      //check if the url accidently was index.php (in that case, the default /home/index is fine)
-      if($url_parts[0] != "index.php" && $url_parts[0] != "")
-      {
-        //otherwise, assign the controller, action and possible data this object
-        $this->str_controller = $url_parts[0];
-
-        if(isset($url_parts[1]))
-        {
-          $this->str_action = $url_parts[1];
-          if(isset($url_parts[2]))
-          {
-            $this->args = $url_parts[2];
-          }
-        }
-      }
-    }
-
-    //at this point, we may assume that $this->str_controller, str_action and args are according to the request
-
-    /*Security takes place here. First get the authorization level of the page
-     *that is visited, then of the user. The latter one should be equal or
-     *lower (0 = admin). A routes.php inside a config folder should specify the levels
-     */
-    if(isset($routes[$this->str_controller][$this->str_action]))
-    {
-      $page_auth_level = $routes[$this->str_controller][$this->str_action];
-    }
-    else
-    {
-      $page_auth_level = TE_AUTH_ADMIN;
-    }
-
-    if($user = static::get_user())
-    {
-      if($user->admin == 1)
-      {
-        //admin user
-        $user_auth_level = TE_AUTH_ADMIN;
-      }
-      else
-      {
-        //logged in, but no admin
-        $user_auth_level = TE_AUTH_USER;
-      }
-    }
-    else
-    {
-      $user_auth_level = TE_AUTH_PUBLIC;
-    }
-
-    if($user_auth_level > $page_auth_level)
-    {
-      //user is not allowwed to view page
-      static::throw(WARNING,"You are not authorized to view this page.");
-      $this->str_controller = "home";
-      $this->str_action = "index";
-    }
-
     /*first check if controller exists, then if this controller has existing
      *action. Throw fatal erros if that is not the case. In the end, call the
      *action at the controller. The action must return an array containing the
@@ -139,6 +68,13 @@ class tank_engine
       //fatal errors occured, print them
       $this->render_errors();
     }
+  }
+
+  public static function redirect($controller = TE_DEFAULT_CONTROLLER, $action = TE_DEFAULT_ACTION, $args = null)
+  {
+    $_SESSION["errors"] = static::get_errors();
+    Header("Location: ".TE_URL_ROOT . "/" . $controller . "/" . $action . "/" . $args);
+    die;
   }
 
   //set and get the user. $user may be any type of Model that is used as 'user'
