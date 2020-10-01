@@ -70,7 +70,7 @@ class tank_engine
     }
   }
 
-  public static function redirect($controller = TE_DEFAULT_CONTROLLER, $action = TE_DEFAULT_ACTION, $args = null)
+  public static function redirect($str_controller = TE_DEFAULT_CONTROLLER, $str_action = TE_DEFAULT_ACTION, $args = null)
   {
     if(isset($_GET["anchor"]) || isset($_POST["anchor"]))
     {
@@ -107,7 +107,7 @@ class tank_engine
     else
     {
       $_SESSION["errors"] = static::get_errors();
-      Header("Location: ".TE_URL_ROOT . "/" . $controller . "/" . $action . "/" . $args);
+      Header("Location: ".TE_URL_ROOT . "/" . $str_controller . "/" . $str_action . "/" . $args);
       die;
     }
   }
