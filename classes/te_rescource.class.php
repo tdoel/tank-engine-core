@@ -24,7 +24,7 @@ class te_rescource Extends te_reply
                        "3" => "image/png",
                        "6" => "image/bmp",
                        "17" => "image/ico");
-        $this->mime = $ntct[exif_imagetype($path)];
+        $this->mime = $ntct[exif_imagetype(te_get_absolute_path($path))];
       }
     }
   }
