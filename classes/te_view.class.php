@@ -69,11 +69,11 @@ class te_view Extends te_reply
       $json_output["html"] = ob_get_clean();
 
       //list required css / js that may or may not have been loaded previously
-      $json_output["css"] = Response::get_css(false);
-      $json_output["js"] = Response::get_js(false);
+      $json_output["css"] = tank_engine::get_css(false);
+      $json_output["js"] = tank_engine::get_js(false);
 
       //list errors
-      $json_output["errors"] = Response::get_errors_associative();
+      $json_output["errors"] = tank_engine::get_errors_associative();
 
       //ajax request may need to load additional parts of the page.
       foreach ($this->ajax_additional_anchors as $anchor)
