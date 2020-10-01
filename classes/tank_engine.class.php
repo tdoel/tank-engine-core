@@ -222,6 +222,10 @@ class tank_engine
     foreach ($errlist as $error) {
       $returnlist[] = array("type" => $error[0], "msg" => $error[1]);
     }
+
+    //mark errors as printed (this method is called in case of AJAX requests)
+    static::$errors_printed = true;
+
     return $returnlist;
 
   }
