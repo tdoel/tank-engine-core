@@ -72,9 +72,44 @@ class tank_engine
 
   public static function redirect($controller = TE_DEFAULT_CONTROLLER, $action = TE_DEFAULT_ACTION, $args = null)
   {
-    $_SESSION["errors"] = static::get_errors();
-    Header("Location: ".TE_URL_ROOT . "/" . $controller . "/" . $action . "/" . $args);
-    die;
+    if(isset($_GET["anchor"]) || isset($_POST["anchor"]))
+    {
+      //AJAX request
+      /*first check if controller exists, then if this controller has existing
+       *action. Throw fatal erros if that is not the case. In the end, call the
+       *action at the controller. The action must return an array containing the
+       *view that should be loaded, and optional data.
+       */
+      $controller_classname = "controller_".$str_controller;
+      if(class_exists($controller_classname))
+      {
+        $controller = new $controller_classname;
+        if($controller->action_exists($str_action))
+        {
+          //call action, it will return a view
+          $view = $controller->{$str_action}($args);
+          $view->set_ajax_pushstate(TE_URL_ROOT . "/" . $str_controller . "/" . $str_action . "/" . $args);
+          return $view;
+        }
+        else
+        {
+          tank_engine::throw_error(ERROR, "Action ". $action . " does not exist in " . $controller . " controller.");
+          return false;
+        }
+      }
+      else
+      {
+        //controller undefined
+        tank_engine::throw_error(ERROR, "Controller " . $controller . " does not exist.");
+        return false;
+      }
+    }
+    else
+    {
+      $_SESSION["errors"] = static::get_errors();
+      Header("Location: ".TE_URL_ROOT . "/" . $controller . "/" . $action . "/" . $args);
+      die;
+    }
   }
 
   //set and get the user. $user may be any type of Model that is used as 'user'
