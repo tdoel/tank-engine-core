@@ -148,6 +148,14 @@ class tank_engine
       static::$js[] = TE_URL_ROOT."/application/js/".$js.".js";
     }
   }
+  public static function get_css()
+  {
+    return static::$css;
+  }
+  public static function get_js()
+  {
+    return static::$js;
+  }
   public static function get_rescources()
   {
     $rescources = array_merge(
