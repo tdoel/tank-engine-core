@@ -93,14 +93,14 @@ class tank_engine
         }
         else
         {
-          tank_engine::throw_error(ERROR, "Action ". $action . " does not exist in " . $controller . " controller.");
+          tank_engine::throw(ERROR, "Action ". $action . " does not exist in " . $controller . " controller.");
           return false;
         }
       }
       else
       {
         //controller undefined
-        tank_engine::throw_error(ERROR, "Controller " . $controller . " does not exist.");
+        tank_engine::throw(ERROR, "Controller " . $controller . " does not exist.");
         return false;
       }
     }
