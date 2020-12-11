@@ -11,7 +11,7 @@
  */
 
 //specify the URL root of your application
-define("TE_URL_ROOT","http://wherever.your.site.is.located.nl");
+define("TE_URL_ROOT","/");
 
 //define default database constants to allow access to the sql database of your project
 define("TE_DB_USER","<sql username>");
