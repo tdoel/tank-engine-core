@@ -6,9 +6,10 @@ class te_view Extends te_reply
   public $data = [];
   public $anchor = null;
 
-  public function __construct($template)
+  public function __construct($template, $data = [])
   {
     $filename = "views/".$template.".php";
+    $this->data = $data;
     if(te_file_exists($filename))
     {
       $this->template = $template;
