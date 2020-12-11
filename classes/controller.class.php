@@ -6,4 +6,3 @@ class te_controller
     return method_exists($this,$action);
   }
 }
-?>

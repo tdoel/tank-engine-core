@@ -17,4 +17,3 @@ abstract class te_reply
     $this->ajax_pushstate = $state;
   }
 }
-?>

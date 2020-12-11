@@ -201,4 +201,3 @@ abstract class wp_model
     return $wpdb->query($query);
   }
 }
- ?>

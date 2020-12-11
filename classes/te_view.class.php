@@ -188,4 +188,3 @@ class te_view Extends te_reply
     return TE_URL_ROOT . $href;
   }
 }
-?>

@@ -290,4 +290,3 @@ class tank_engine
     static::$errors_printed = true;
   }
 }
-?>

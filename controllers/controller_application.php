@@ -15,4 +15,3 @@ class controller_application Extends te_controller
     return new te_rescource("img/".$file);
   }
 }
-?>

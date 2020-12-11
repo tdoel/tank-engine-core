@@ -110,4 +110,3 @@ class te_rescource Extends te_reply
     }
   }
 }
-?>
