@@ -80,7 +80,7 @@ class te_rescource Extends te_reply
             'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
         );
 
-        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $ext = pathinfo($this->path, PATHINFO_EXTENSION);
 
         if(isset($mime_types[$ext]))
         {
