@@ -158,6 +158,12 @@ function te_autoload($class_name)
   if(file_exists($path))
   {
     require_once $path;
+    //call static constructor if available
+    $call = $class_name."::__construct_static";
+    if (is_callable($call))
+    {
+      call_user_func($call);
+    }
     return;
   }
 
@@ -166,6 +172,12 @@ function te_autoload($class_name)
   if(file_exists($path))
   {
     require_once $path;
+    //call static constructor if available
+    $call = $class_name."::__construct_static";
+    if (is_callable($call))
+    {
+      call_user_func($call);
+    }
     return;
   }
 
