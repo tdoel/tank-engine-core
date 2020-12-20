@@ -147,19 +147,19 @@ class te_model
   }
 
   /* DATABASE INTERACTION METHODS */
-  public static function get_results($sql, $params = [])
+  protected static function get_results($sql, $params = [])
   {
     $stmt = static::$conn->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll();
   }
-  public static function get_row($sql, $params = [])
+  protected static function get_row($sql, $params = [])
   {
     $stmt = static::$conn->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetch();
   }
-  public static function get_var($sql, $params = [])
+  protected static function get_var($sql, $params = [])
   {
     return static::get_row($sql, $params)[0];
   }
