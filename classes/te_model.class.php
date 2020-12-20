@@ -80,7 +80,7 @@ class te_model
     }
 
     //use $construction_array to fill object with data
-    foreach(static::$fields as $field => $datatype)
+    foreach(static::$fields as $field => $fieldinfo)
     {
       if($this->is_field_model($field))
       {
@@ -96,6 +96,7 @@ class te_model
         else
         {
           //not defined, so a new child
+          $datatype = $fieldinfo["datatype"];
           $this->$field = new $datatype();
         }
       }
@@ -183,7 +184,6 @@ class te_model
 
     $sql .= $sql_columns . " " . $sql_values;
 
-
     //prepare query
     $stmt = static::$conn->prepare($sql);
 
@@ -251,7 +251,7 @@ class te_model
   {
     if($this->is_field_model($field))
     {
-      $classname = static::$fields[$field];
+      $classname = static::$fields[$field]["datatype"];
       $fieldname = $field."_id";
       $this->$field = new $classname($this->$fieldname);
       return $this->$field;
@@ -276,9 +276,9 @@ class te_model
     //creates a table for this model
     $sql = "CREATE TABLE " . static::$table_name . " (";
     $sql .= "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,";
-    foreach(static::$fields as $field => $type)
+    foreach(static::$fields as $field => $fieldinfo)
     {
-      $sql .= $field . " " . $type . ",";
+      $sql .= $field . " " . $fieldinfo["datatype"] . ",";
     }
     $sql = substr($sql,0,-1) . ")";
     static::$conn->query($sql);
@@ -301,8 +301,9 @@ class te_model
 
     //compare defined fields with columns in db
     $sql = "";
-    foreach(static::$fields as $column_name => $datatype)
+    foreach(static::$fields as $column_name => $fieldinfo)
     {
+      $datatype = $fieldinfo["datatype"];
       if(substr($datatype,0,6) == "model_")
       {
         //this is a model
@@ -367,7 +368,7 @@ class te_model
   private function get_assoc_array()
   {
     $array = [];
-    foreach(static::$fields as $field => $datatype)
+    foreach(static::$fields as $field => $fieldinfo)
     {
       if($this->is_field_model($field))
       {
@@ -382,6 +383,6 @@ class te_model
   }
   private function is_field_model($column_name) //FIXME: should be static
   {
-    return substr(static::$fields[$column_name],0,6) == "model_";
+    return isset(static::$fields[$column_name]) ? (substr(static::$fields[$column_name]["datatype"],0,6) == "model_") : false;
   }
 }
