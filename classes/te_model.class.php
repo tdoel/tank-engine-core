@@ -40,6 +40,10 @@ class te_model
       $this->id = $id;
     }
   }
+  public function destroy()
+  {
+    static::delete(array("id" => $this->id));
+  }
 
   /* CONSTRUCTORS */
   public function __construct($construction = null)
@@ -220,6 +224,26 @@ class te_model
 
     //execute query, with values as parameters
     $stmt->execute($params);
+  }
+  protected static function delete($where)
+  {
+    $sql = "DELETE FROM ".static::$table_name;
+
+    //compose WHERE part
+    $sql_where = "";
+    foreach($where as $colname => $value)
+    {
+      $sql_where .= $colname."=:".$colname." AND ";
+    }
+    $sql_where = "WHERE ".substr($sql_where,0,-5);
+
+    $sql .= " " . $sql_where;
+
+    //prepare query
+    $stmt = static::$conn->prepare($sql);
+
+    //execute query with $where as param values
+    $stmt->execute($where);
   }
 
   /* MAGIC METHODS */
