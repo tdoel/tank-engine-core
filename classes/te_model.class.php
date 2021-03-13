@@ -101,17 +101,9 @@ class te_model
             }
             else
             {
-              //not defined, so a new child
+              //not defined, so create a new child
               $datatype = $field->get_datatype();
               $this->$fieldname = new $datatype();
-              //FIX:
-              //https://stackoverflow.com/questions/17632848/php-sub-class-static-inheritance-children-share-static-variables
-              //print_r(static::$fields);
-              //echo "<hr />";
-              //echo get_called_class() . " - ";
-              //print_r($field);
-              //echo " - ";
-              //print_r($field->get_datatype());
             }
             break;
           case "has_one":
@@ -331,6 +323,7 @@ class te_model
     }
     return $objects;
   }
+  //get the fields belonging to the current class as objects
   protected static function &get_ob_fields()
   {
     if (!isset(self::$obfields[get_called_class()]))
