@@ -25,6 +25,9 @@ class te_model
   //this will hold the database connection
   protected static $conn = null;
 
+  private static $obfields = [];
+
+
   /* PUBLIC METHODS */
   public function save()
   {
@@ -79,36 +82,56 @@ class te_model
       $construction_array = array_merge($construction_array, $construction);
     }
 
-    //use $construction_array to fill object with data
-    foreach(static::$fields as $field => $fieldinfo)
+    foreach(static::get_ob_fields() as $field)
     {
-      if($this->is_field_model($field))
+      if($field->is_model())
       {
-        //if the id of the child is given, only save the id to the object. The
-        //child itself will be loaded upon request, using the __get magical
-        //method. If the id is not given, add a new child
-        $fieldname = $field."_id";
-        if(isset($construction_array[$fieldname]))
+        switch ($field->get_association())
         {
-          //id defined, save id to object
-          $this->$fieldname = $construction_array[$fieldname];
-        }
-        else
-        {
-          //not defined, so a new child
-          $datatype = $fieldinfo["datatype"];
-          $this->$field = new $datatype();
+          case "belongs_to":
+            //if the id of the child is given, only save the id to the object. The
+            //child itself will be loaded upon request, using the __get magical
+            //method. If the id is not given, add a new child
+            $fieldname = $field->get_fieldname();
+            $fieldname_id = $fieldname."_id";
+            if(isset($construction_array[$fieldname_id]))
+            {
+              //id defined, save id to object
+              $this->$fieldname_id = $construction_array[$fieldname_id];
+            }
+            else
+            {
+              //not defined, so a new child
+              $datatype = $field->get_datatype();
+              $this->$fieldname = new $datatype();
+              //FIX:
+              //https://stackoverflow.com/questions/17632848/php-sub-class-static-inheritance-children-share-static-variables
+              //print_r(static::$fields);
+              //echo "<hr />";
+              //echo get_called_class() . " - ";
+              //print_r($field);
+              //echo " - ";
+              //print_r($field->get_datatype());
+            }
+            break;
+          case "has_one":
+            //do nothing, delegate fetch operation to __get()
+            break;
+          case "has_many":
+            //do nothing, delegate fetch operation to __get()
+            break;
         }
       }
       else
       {
-        if(isset($construction_array[$field]))
+        $fieldname = $field->get_fieldname();
+        if(isset($construction_array[$fieldname]))
         {
-          $this->$field = $construction_array[$field];
+          $this->$fieldname = $construction_array[$fieldname];
         }
         else
         {
-          $this->$field = 0;
+          $this->$fieldname = 0;
         }
       }
     }
@@ -126,11 +149,17 @@ class te_model
     //verify that $table_name and $fields are set by the model
     if(!isset(static::$table_name))
     {
-      throw new Exception(get_class($this) . ' does not define $table_name');
+      throw new Exception(get_called_class() . ' does not define $table_name');
     }
     if(!isset(static::$fields))
     {
-      throw new Exception(get_class($this) . ' does not define $fields');
+      throw new Exception(get_called_class() . ' does not define $fields');
+    }
+
+    //put fields into into objects
+    foreach(static::$fields as $fieldname => $fieldinfo)
+    {
+      static::get_ob_fields()[$fieldname] = new te_model_field($fieldname, $fieldinfo);
     }
 
     //attempt to connect to database
@@ -249,13 +278,66 @@ class te_model
   /* MAGIC METHODS */
   public function __get($field)
   {
-    if($this->is_field_model($field))
+    $obfield = static::get_ob_fields()[$field];
+    switch($obfield->get_association())
     {
-      $classname = static::$fields[$field]["datatype"];
-      $fieldname = $field."_id";
-      $this->$field = new $classname($this->$fieldname);
-      return $this->$field;
+      case "belongs_to":
+        $field_id = $field."_id";
+        if(isset($this->$field_id))
+        {
+          //id is known
+          $id = $this->$field_id;
+        }
+        $classname = $obfield->get_datatype();
+        $this->$field = new $classname($id);
+        return $this->$field;
+        break;
+      case "has_one":
+        //$classname = $obfield->get_datatype();
+        $foreign_key = $obfield->get_foreign_key();
+        $foreign_table = $obfield->get_foreign_table();
+        $classname = $obfield->get_datatype();
+        $item = static::get_row("SELECT * FROM $foreign_table WHERE $foreign_key = :id", array("id" => $this->id));
+        return new $classname($item);
+        break;
+      case "has_many":
+        $foreign_key = $obfield->get_foreign_key();
+        $foreign_table = $obfield->get_foreign_table();
+        $classname = $obfield->get_datatype();
+        $items = static::get_results("SELECT * FROM $foreign_table WHERE $foreign_key = :id", array("id" => $this->id));
+        return $this->get_ob_list($items, $classname);
+        break;
     }
+  }
+
+  /* PUBLIC METHODS FOR INTERNAL USE */
+  public static function get_table_name()
+  {
+    return static::$table_name;
+  }
+
+  /* PROTECTED METHODS FOR INTERNAL USE */
+  //get a list of objects from an associative array
+  protected function get_ob_list($array, $classname = null)
+  {
+    $objects = [];
+    if ($classname == null)
+    {
+      $classname = get_called_class();
+    }
+    foreach ($array as $item_assoc)
+    {
+      $objects[] = new $classname($item_assoc);
+    }
+    return $objects;
+  }
+  protected static function &get_ob_fields()
+  {
+    if (!isset(self::$obfields[get_called_class()]))
+    {
+      self::$obfields[get_called_class()] = [];
+    }
+    return self::$obfields[get_called_class()];
   }
 
   /* PRIVATE METHODS FOR INTERNAL USE */
@@ -301,15 +383,9 @@ class te_model
 
     //compare defined fields with columns in db
     $sql = "";
-    foreach(static::$fields as $column_name => $fieldinfo)
+    $fields_assoc = static::get_db_columns();
+    foreach($fields_assoc as $column_name => $datatype)
     {
-      $datatype = $fieldinfo["datatype"];
-      if(substr($datatype,0,6) == "model_")
-      {
-        //this is a model
-        $column_name = $column_name . "_id";
-        $datatype = "int";
-      }
       if(!isset($db_columns_assoc[$column_name]))
       {
         //column does not exist, create it
@@ -325,19 +401,14 @@ class te_model
     //compare db columns with field to see if any column should be dropped
     foreach($db_columns_assoc as $column_name => $datatype)
     {
-      if(substr($column_name,-3) == "_id")
-      {
-        //column names suffixed with _id are reffering to other models
-        $column_name = substr($column_name,0,-3);
-      }
       if($column_name == "id")
       {
         //column id should never be defined in a model -> do nothing
       }
-      else if(!isset(static::$fields[$column_name]))
+      else if(!isset($fields_assoc[$column_name]))
       {
         //column not defined in model, so it can be dropped
-        tank_engine::throw(WARNING,"Column '".$column_name."' in database table '".static::$table_name."' is not defined by '".get_class($this)."'. Can it be dropped?");
+        tank_engine::throw(WARNING,"Column '".$column_name."' in database table '".static::$table_name."' is not defined by '".get_called_class()."'. Can it be dropped?");
       }
     }
 
@@ -346,6 +417,15 @@ class te_model
     {
       static::$conn->query($sql);
     }
+  }
+  private static function get_db_columns()
+  {
+    $columns = [];
+    foreach(static::get_ob_fields() as $fieldname => $field)
+    {
+      $columns = array_merge($columns, $field->get_db_columns());
+    }
+    return $columns;
   }
   private static function is_equal_datatypes($type1, $type2)
   {
@@ -383,6 +463,6 @@ class te_model
   }
   private function is_field_model($column_name) //FIXME: should be static
   {
-    return isset(static::$fields[$column_name]) ? (substr(static::$fields[$column_name]["datatype"],0,6) == "model_") : false;
+    return isset(static::get_ob_fields()[$column_name]) ? (static::$obfields[$column_name]->is_model()) : false;
   }
 }
