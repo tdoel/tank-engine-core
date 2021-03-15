@@ -74,7 +74,7 @@ class te_model
         throw new Exception("Record with id = $construction does not exist in ".static::$table_name." (issued by ".get_called_class().").");
       }
 
-      //assign id to self, to indicate that the object exists in database
+      //assign id to self, to indicate that         the object exists in database
       $this->id = $construction;
     }
     else if(is_array($construction))
