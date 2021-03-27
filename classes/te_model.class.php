@@ -52,14 +52,7 @@ class te_model
   public function __construct($construction = null)
   {
     //prepare a construction array, with default values if present
-    if(isset(static::$field_defaults))
-    {
-      $construction_array = static::$field_defaults;
-    }
-    else
-    {
-      $construction_array = [];
-    }
+    $construction_array = static::get_default_construction_array();
 
     //interpret $construction and compese an associative array with the data to
     //add to this model
@@ -331,6 +324,27 @@ class te_model
       self::$obfields[get_called_class()] = [];
     }
     return self::$obfields[get_called_class()];
+  }
+  //return the default values (if any) in the form of an associative array
+  protected static function get_default_construction_array()
+  {
+    $array = [];
+    foreach (static::get_ob_fields() as $fieldname => $field)
+    {
+      if ($default = $field->get_default_value())
+      {
+        if($field->is_model() && is_numeric($default))
+        {
+          //assume this is an ID
+          $array[$fieldname."_id"] = $default;
+        }
+        else
+        {
+          $array[$fieldname] = $default;
+        }
+      }
+    }
+    return $array;
   }
 
   /* PRIVATE METHODS FOR INTERNAL USE */

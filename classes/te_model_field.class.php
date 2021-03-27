@@ -6,12 +6,14 @@ class te_model_field
   private $datatype = "";
   private $association = "";
   private $foreign_key = "";
+  private $default_value = null;
 
   //for validation
   private $allowed_properties = array(
     "datatype" => "",
     "association" => ["belongs_to","has_one","has_many"],
     "foreign_key" => "",
+    "default_value" => "",
   );
 
   public function __construct($fieldname, $properties)
@@ -119,6 +121,10 @@ class te_model_field
   public function get_datatype()
   {
     return $this->datatype;
+  }
+  public function get_default_value()
+  {
+    return $this->default_value;
   }
   public function is_model()
   {
