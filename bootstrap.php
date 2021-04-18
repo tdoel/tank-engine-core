@@ -8,6 +8,12 @@
 //define the document root (parent directory of current script)
 define("TE_DOCUMENT_ROOT",dirname(__DIR__));
 
+//set a general exception handler
+set_exception_handler("te_exception_handler");
+
+//set a general error handler to turn errors into exceptions
+set_error_handler("te_error_handler");
+
 //add autoloader to php
 spl_autoload_register("te_autoload");
 
@@ -40,6 +46,26 @@ foreach ($basenames as $basename => $path_prefix)
 }
 
 /* below the function definitions of the Tank Engine core functions*/
+
+// general exception handler
+function te_exception_handler($exception)
+{
+  do
+  {
+    $msg = $exception->getMessage();
+    $code = $exception->getCode();
+    $file = $exception->getFile();
+    $line = $exception->getLine();
+
+    echo "<p>Uncaught exception [$code]: $msg in <b>$file</b> on line <b>$line</b>.</p>";
+  }
+  while ($exception = $exception->getPrevious());
+}
+function te_error_handler($severity, $message, $filename, $lineno)
+{
+    throw new ErrorException($message, 0, $severity, $filename, $lineno);
+    //FIXME: this also makes warnings fatal, maybe that's not desired
+}
 
 //autoloader for files, such as config
 function te_require_once($file)
