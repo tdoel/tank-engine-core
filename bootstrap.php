@@ -174,6 +174,10 @@ function te_autoload($class_name)
   {
     $relative_path = "/models/".$class_name.".php";
   }
+  elseif($class_name[0] == "_")
+  {
+    $relative_path = "/core/".$class_name.".core.class.php";
+  }
   else
   {
     $relative_path = "/classes/".$class_name.".class.php";
