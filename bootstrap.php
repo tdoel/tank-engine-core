@@ -18,7 +18,14 @@ set_error_handler("te_error_handler");
 spl_autoload_register("te_autoload");
 
 //initialize Tank Engine class
-$tank_engine = new tank_engine();
+$te = new te();
+$te->initialize();
+
+//print_r($te);
+
+
+//initialize Tank Engine class
+/*$tank_engine = new tank_engine();
 
 //look into the config directories in framework and application. If the same file
 //is present in both directories, only include the application version.
@@ -43,7 +50,7 @@ ksort($basenames);
 foreach ($basenames as $basename => $path_prefix)
 {
   include TE_DOCUMENT_ROOT . "/" . $path_prefix . "/boot/" . $basename;
-}
+}*/
 
 /* below the function definitions of the Tank Engine core functions*/
 
@@ -165,18 +172,24 @@ function te_autoload($class_name)
   //all file names are lowercase
   $class_name = strtolower($class_name);
 
+  //prepare error code to fire
+  $err_code = 2;
+
   //filter out controllers and models first
   if(strpos($class_name,"controller_") === 0)
   {
     $relative_path = "/controllers/".$class_name.".php";
+    $err_code = 5;
   }
   elseif(strpos($class_name,"model_") === 0)
   {
     $relative_path = "/models/".$class_name.".php";
+    $err_code = 4;
   }
   elseif($class_name[0] == "_")
   {
     $relative_path = "/core/".$class_name.".core.class.php";
+    $err_code = 3;
   }
   else
   {
@@ -212,5 +225,5 @@ function te_autoload($class_name)
   }
 
   //if neither of those work, throw an exception
-  trigger_error("[Tank Engine] The class ".$class_name." was requested, but its file could not be found",E_USER_WARNING);
+  throw new te_runtime_error("The class ".$class_name." was requested, but its file could not be found",$err_code);
 }
