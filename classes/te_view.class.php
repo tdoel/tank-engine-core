@@ -99,6 +99,8 @@ class te_view Extends te_reply
   //this function outputs the actual template
   public function render($anchor = null)
   {
+    //this makes $te available in view .php files
+    global $te;
     if($anchor != null)
     {
       //call for subview, get template from stored values
@@ -143,6 +145,7 @@ class te_view Extends te_reply
   }
   public function link($href, $text = null, $ajax_anchor = null, $form_id = null, $classes = [])
   {
+    global $te;
     //put a slash in front of it if neccesary
     if(strpos($href,"/") !== 0)
     {
@@ -161,21 +164,21 @@ class te_view Extends te_reply
       {
         if($form_id)
         {
-          return '<a href="" id="a_'.$form_id.'" onclick="mvc.ajax_load_page(\''.TE_URL_ROOT.$href.'\',\''.$ajax_anchor.'\',$(\'#'.$form_id.'\').serializeJSON()); return false" '.$str_class.'>'.$text.'</a>';
+          return '<a href="" id="a_'.$form_id.'" onclick="mvc.ajax_load_page(\''.$te->url_root.$href.'\',\''.$ajax_anchor.'\',$(\'#'.$form_id.'\').serializeJSON()); return false" '.$str_class.'>'.$text.'</a>';
         }
         else
         {
-          return '<a href="" onclick="mvc.ajax_load_page(\''.TE_URL_ROOT.$href.'\',\''.$ajax_anchor.'\'); return false" '.$str_class.'>'.$text.'</a>';
+          return '<a href="" onclick="mvc.ajax_load_page(\''.$te->url_root.$href.'\',\''.$ajax_anchor.'\'); return false" '.$str_class.'>'.$text.'</a>';
         }
       }
       else
       {
-        return '<a href="'.TE_URL_ROOT.$href.'" '.$str_class.'>'.$text.'</a>';
+        return '<a href="'.$te->url_root.$href.'" '.$str_class.'>'.$text.'</a>';
       }
     }
     else
     {
-      return TE_URL_ROOT.$href;
+      return $te->url_root.$href;
     }
 
   }

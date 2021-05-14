@@ -148,7 +148,8 @@ class te_model
     }
 
     //attempt to connect to database
-    static::$conn = new PDO("mysql:host=".TE_DB_HOST.";dbname=".TE_DB_DB, TE_DB_USER, TE_DB_PASS);
+    global $te;
+    static::$conn = new PDO("mysql:host=".$te->config["db"]["host"].";dbname=".$te->config["db"]["db"], $te->config["db"]["username"], $te->config["db"]["password"]);
 
     //set the PDO error mode to exception
     static::$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -374,11 +375,12 @@ class te_model
   }
   private static function update_table()
   {
+    global $te;
     //updates an existing table for this model to the correct columns
 
     //get the columns from the database
     $db_columns = static::get_results('SELECT COLUMN_NAME, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS'.
-      ' WHERE TABLE_SCHEMA = "'.TE_DB_DB.'"'.
+      ' WHERE TABLE_SCHEMA = "'.$te->config["db"]["db"].'"'.
       ' AND TABLE_NAME = "'.static::$table_name.'"');
 
     //reshape $db_columns such that it resembles $fields

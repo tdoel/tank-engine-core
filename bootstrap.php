@@ -151,14 +151,14 @@ function te_file_exists($file)
 {
   //check if the framwork version is available
   $path = TE_DOCUMENT_ROOT . "/framework/" . $file;
-  if(file_exists($path))
+  if(is_file($path))
   {
     return true;
   }
 
   //check if the application version is available
   $path = TE_DOCUMENT_ROOT . "/application/" . $file;
-  if(file_exists($path))
+  if(is_file($path))
   {
     return true;
   }

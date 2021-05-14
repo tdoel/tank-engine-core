@@ -8,7 +8,7 @@ class te_rescource Extends te_reply
   {
     if(!te_file_exists($path))
     {
-      tank_engine::throw(WARNING, "Rescource ".$path. " seems to be missing.");
+      throw new te_runtime_warning("Rescource ".$path. " seems to be missing");
     }
     else
     {
