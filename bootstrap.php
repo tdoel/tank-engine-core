@@ -196,3 +196,29 @@ function te_autoload($class_name)
   //if neither of those work, throw an exception
   throw new te_runtime_error("The class ".$class_name." was requested, but its file could not be found",$err_code);
 }
+function te_parse_ini_file($path, $process_sections = false , $scanner_mode = INI_SCANNER_NORMAL)
+{
+  $ini = [];
+  $file_found = false;
+
+  $framework_path = TE_DOCUMENT_ROOT . "/framework/" . $path;
+  $application_path = TE_DOCUMENT_ROOT . "/application/" . $path;
+
+  if(file_exists($framework_path))
+  {
+    $file_found = true;
+    $ini = array_merge($ini, parse_ini_file($framework_path, $process_sections, $scanner_mode));
+  }
+  if(file_exists($application_path))
+  {
+    $file_found = true;
+    $ini = array_merge($ini, parse_ini_file($application_path, $process_sections, $scanner_mode));
+  }
+
+  if(!$file_found)
+  {
+    throw new te_runtime_warning("INI file '".$path."' requested but it could not be found");
+  }
+
+  return $ini;
+}
