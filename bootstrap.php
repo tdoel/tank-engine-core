@@ -21,37 +21,6 @@ spl_autoload_register("te_autoload");
 $te = new te();
 $te->initialize();
 
-//print_r($te);
-
-
-//initialize Tank Engine class
-/*$tank_engine = new tank_engine();
-
-//look into the config directories in framework and application. If the same file
-//is present in both directories, only include the application version.
-//files are loaded in alphabetical order
-$basenames = [];
-
-foreach (glob(TE_DOCUMENT_ROOT . "/framework/boot/*.php") as $path)
-{
-  $basenames[basename($path)] = "framework";
-}
-foreach (glob(TE_DOCUMENT_ROOT . "/application/boot/*.php") as $path)
-{
-  $basenames[basename($path)] = "application";
-}
-//$basenames now contains an array of all files in the config directories. If both
-//application and framework version of a file are available, it points to the application version.
-
-//sort the basenames array to its keys, such that files will be included in alphabetical order
-ksort($basenames);
-
-//perform the actual includes.
-foreach ($basenames as $basename => $path_prefix)
-{
-  include TE_DOCUMENT_ROOT . "/" . $path_prefix . "/boot/" . $basename;
-}*/
-
 /* below the function definitions of the Tank Engine core functions*/
 
 // general exception handler
