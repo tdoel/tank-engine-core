@@ -7,6 +7,8 @@ class _te
   public $args = null;
   public $handle_request_counter = 0;
   public $handle_request_maximum = 10;
+  public $route_authorization = 0;
+  public $user_authorization = 0;
 
   public $css = [];
   public $js = [];
@@ -17,6 +19,7 @@ class _te
   {
     $this->load_config();
     $this->interpret_config();
+    $this->load_routes();
     $this->lookup_request_url();
     $this->parse_request_url();
 
@@ -28,8 +31,7 @@ class _te
   //load the config.ini file
   public function load_config()
   {
-    $ini = parse_ini_file(te_get_absolute_path("config/config.ini"),true);
-    $this->config = $ini;
+    $this->config = te_parse_ini_file("config/config.ini",true);
   }
 
   //interpret the config file by setting appropriate properties
@@ -74,6 +76,12 @@ class _te
     }
   }
 
+  //load the routes.ini file
+  public function load_routes()
+  {
+    $this->routes = te_parse_ini_file("config/routes.ini",true);
+  }
+
   //parse request url
   public function parse_request_url()
   {
@@ -105,6 +113,14 @@ class _te
     if($this->handle_request_counter > $this->handle_request_maximum)
     {
       throw new te_runtime_error("Request overflow; _te::handle_request() possibly stuck in a loop. Maybe the default route is forbidden or inacccesible?");;
+    }
+
+    //check if the user is authorized for the requested route
+    if($this->redirect_if_not_authorized())
+    {
+      //if he is not, rerun the handle_request() routine with the updated route
+      $this->handle_request();
+      return;
     }
 
     /*first check if controller exists, then if this controller has existing
@@ -177,6 +193,50 @@ class _te
     }
 
   }
+
+  //validate if the current user is authorized for the requested route, redirect
+  //if neccesary
+  public function redirect_if_not_authorized()
+  {
+    $this->lookup_user_authorization();
+    $this->lookup_route_authorization();
+
+    if(!$this->is_authorized())
+    {
+      //redirect to default route
+      $this->str_controller = $this->config["default_routes"]["controller"];
+      $this->str_action = $this->config["default_routes"]["action"];
+      $this->data = $this->config["default_routes"]["data"];
+
+      $this->add_message("warning","You are not authorized to view this page");
+
+      return true;
+    }
+
+    //return false to indicate no redirection has taken place
+    return false;
+  }
+  public function is_authorized()
+  {
+    return ($this->user_authorization <= $this->route_authorization);
+  }
+  public function lookup_user_authorization()
+  {
+    $this->user_authorization = 2;
+  }
+  public function lookup_route_authorization()
+  {
+    if(isset($this->routes[$this->str_controller][$this->str_action]))
+    {
+      $this->route_authorization = $this->routes[$this->str_controller][$this->str_action];
+    }
+    else
+    {
+      //default: ADMIN only
+      $this->route_authorization = 0;
+    }
+  }
+
   //add css / js resp. to the reply
   public function add_css($css)
   {
