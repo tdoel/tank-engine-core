@@ -10,6 +10,9 @@ class _te
   public $route_authorization = 0;
   public $user_authorization = 0;
 
+  public $config = [];
+
+  public $user = null;
   public $css = [];
   public $js = [];
   public $messages = [];
@@ -17,6 +20,7 @@ class _te
   //initialize the TE object
   public function initialize()
   {
+    $this->do_preliminaries();
     $this->load_config();
     $this->interpret_config();
     $this->load_routes();
@@ -26,6 +30,12 @@ class _te
     $this->add_default_resources();
 
     $this->handle_request();
+  }
+
+  // do some 'preliminiary' stuff, such as starting a session
+  public function do_preliminaries()
+  {
+    session_start();
   }
 
   //load the config.ini file
@@ -222,7 +232,25 @@ class _te
   }
   public function lookup_user_authorization()
   {
-    $this->user_authorization = 2;
+    if($user = $this->get_user())
+    {
+      //check if admin attribut is set and evaluates to true
+      if(isset($user->admin) && $user->admin)
+      {
+        //logged in, admin
+        $this->user_authorization = 0;
+      }
+      else
+      {
+        //logged in, no admin
+        $this->user_authorization = 1;
+      }
+    }
+    else
+    {
+      //not logged in
+      $this->user_authorization = 2;
+    }
   }
   public function lookup_route_authorization()
   {
@@ -235,6 +263,35 @@ class _te
       //default: ADMIN only
       $this->route_authorization = 0;
     }
+  }
+
+  //set a user object
+  public function set_user($user)
+  {
+    $this->user = $user;
+    $_SESSION["user_id"] = $user->id;
+  }
+  //get a user if it is set, return false otherwise
+  public function get_user()
+  {
+    if($this->user)
+    {
+      return $this->user;
+    }
+    elseif (isset($_SESSION["user_id"]))
+    {
+      $this->user = new model_user($_SESSION["user_id"]);
+      return $this->user;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  public function user_log_out()
+  {
+    $this->user = null;
+    session_destroy();
   }
 
   //add css / js resp. to the reply
