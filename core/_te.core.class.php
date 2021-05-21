@@ -270,6 +270,7 @@ class _te
   {
     $this->user = $user;
     $_SESSION["user_id"] = $user->id;
+    $_SESSION["user_class"] = get_class($user);
   }
   //get a user if it is set, return false otherwise
   public function get_user()
@@ -280,7 +281,8 @@ class _te
     }
     elseif (isset($_SESSION["user_id"]))
     {
-      $this->user = new model_user($_SESSION["user_id"]);
+      $classname = $_SESSION["user_class"];
+      $this->user = new $classname($_SESSION["user_id"]);
       return $this->user;
     }
     else
@@ -292,6 +294,7 @@ class _te
   {
     $this->user = null;
     unset($_SESSION["user_id"]);
+    unset($_SESSION["user_class"]);
     session_destroy();
   }
 
