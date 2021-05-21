@@ -291,6 +291,7 @@ class _te
   public function user_log_out()
   {
     $this->user = null;
+    unset($_SESSION["user_id"]);
     session_destroy();
   }
 
