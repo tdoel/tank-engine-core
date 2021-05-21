@@ -21,9 +21,9 @@ class _te
   public function initialize()
   {
     $this->do_preliminaries();
-    $this->load_config();
+    $this->lookup_config();
     $this->interpret_config();
-    $this->load_routes();
+    $this->lookup_routes();
     $this->lookup_request_url();
     $this->parse_request_url();
 
@@ -39,7 +39,7 @@ class _te
   }
 
   //load the config.ini file
-  public function load_config()
+  public function lookup_config()
   {
     $this->config = te_parse_ini_file("config/config.ini",true);
   }
@@ -87,7 +87,7 @@ class _te
   }
 
   //load the routes.ini file
-  public function load_routes()
+  public function lookup_routes()
   {
     $this->routes = te_parse_ini_file("config/routes.ini",true);
   }
