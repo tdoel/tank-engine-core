@@ -317,9 +317,9 @@ class _te
     if(!filter_var($js, FILTER_VALIDATE_URL))
     {
       // $css points to a local resource
-      $js = $this->url_root."/application/css/".$js.".js";
+      $js = $this->url_root."/application/js/".$js.".js";
     }
-    //add the full CSS url if it is not already included
+    //add the full JS url if it is not already included
     if (!in_array($js, $this->js))
     {
       $this->js[] = $js;
