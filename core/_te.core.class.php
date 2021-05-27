@@ -147,6 +147,19 @@ class _te
       {
         //call action, it will return a reply
         $this->reply = $this->controller->{$this->str_action}($this->args);
+
+        if($this->reply instanceof te_redirect)
+        {
+          // the controller decided a redirect was neccesary (typically outside)
+          // of current controller. Update controller, action and data fields,
+          // rerun handle_request() accordingly
+          $this->str_controller = $this->reply->controller;
+          $this->str_action = $this->reply->action;
+          $this->args = $this->reply->args;
+
+          $this->handle_request();
+          return;
+        }
       }
       else
       {
@@ -202,6 +215,11 @@ class _te
       $this->render_messages();
     }
 
+  }
+
+  public function redirect($controller = "", $action = "", $args = "")
+  {
+    return new te_redirect($controller, $action, $args);
   }
 
   //validate if the current user is authorized for the requested route, redirect
