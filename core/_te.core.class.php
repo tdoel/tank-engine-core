@@ -346,11 +346,14 @@ class _te
   public function add_default_resources()
   {
     //adds the default resources
+
+    //separate method for jQuery such that it can easily be overridden by
+    //another version
+    $this->add_jquery();
+
     $this->add_css("te.core");
     $this->add_js("te.core");
     $this->add_js("te.jquery.serializejson");
-
-    $this->add_jquery();
   }
   //add jquery
   public function add_jquery()
