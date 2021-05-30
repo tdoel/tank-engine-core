@@ -25,7 +25,7 @@ class te_model
   //this will hold the database connection
   protected static $conn = null;
 
-  private static $obfields = [];
+  protected static $obfields = [];
 
 
   /* PUBLIC METHODS */
@@ -471,6 +471,6 @@ class te_model
   }
   private function is_field_model($column_name) //FIXME: should be static
   {
-    return isset(static::get_ob_fields()[$column_name]) ? (static::$obfields[$column_name]->is_model()) : false;
+    return isset(static::get_ob_fields()[$column_name]) ? (static::get_ob_fields()[$column_name]->is_model()) : false;
   }
 }
