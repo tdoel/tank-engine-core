@@ -59,13 +59,12 @@ class te_model
     if(is_numeric($construction))
     {
       //numeric constructor, interpret this as id
-      $construction_array = array_merge($construction_array,static::get_row("SELECT * FROM ".static::$table_name." WHERE id = :id", array("id" => $construction)));
-
-      if($construction_array == [])
+      $db_object = static::get_row("SELECT * FROM ".static::$table_name." WHERE id = :id", array("id" => $construction));
+      if(!$db_object)
       {
-        //item with this id not found
-        throw new Exception("Record with id = $construction does not exist in ".static::$table_name." (issued by ".get_called_class().").");
+        throw new te_runtime_error("Attempted to generate '".get_called_class()."' from ID = '".$construction."', but a record with this ID does not exist");
       }
+      $construction_array = array_merge($construction_array,$db_object);
 
       //assign id to self, to indicate that         the object exists in database
       $this->id = $construction;
