@@ -173,7 +173,14 @@ class te_view Extends te_reply
       }
       else
       {
-        return '<a href="'.$te->url_root.$href.'" '.$str_class.'>'.$text.'</a>';
+        if($form_id)
+        {
+          return '<a href="" id="a_'.$form_id.'" onclick="$(\'#'.$form_id.'\').submit(); return false" '.$str_class.'>'.$text.'</a>';
+        }
+        else
+        {
+          return '<a href="'.$te->url_root.$href.'" '.$str_class.'>'.$text.'</a>';
+        }
       }
     }
     else
