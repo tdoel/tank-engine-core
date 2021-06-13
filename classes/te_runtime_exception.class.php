@@ -17,7 +17,7 @@ class te_runtime_exception Extends Exception
       <td>Class used</td>
       </tr>";
       $trace = $this->getTrace();
-      for($i = 0; $i < count($trace); $i++)
+      for($i = -1; $i < count($trace); $i++)
       {
         if (isset($trace[$i+1]["class"]) && isset($te_loaded_classes[$trace[$i+1]["class"]]) && $te_loaded_classes[$trace[$i+1]["class"]] == "application")
         {
@@ -27,8 +27,8 @@ class te_runtime_exception Extends Exception
         {
           echo "<tr>";
         }
-        echo "<td>".(isset($trace[$i]["file"]) ? $trace[$i]["file"] : "-")."</td>";
-        echo "<td>".(isset($trace[$i]["line"]) ? $trace[$i]["line"] : "-")."</td>";
+        echo "<td>".(isset($trace[$i]["file"]) ? $trace[$i]["file"] : ($i == -1 ? $this->getFile() : "-"))."</td>";
+        echo "<td>".(isset($trace[$i]["line"]) ? $trace[$i]["line"] : ($i == -1 ? $this->getLine() : "-"))."</td>";
         echo "<td>".(isset($trace[$i+1]["class"]) ? $trace[$i+1]["class"] : "-")."</td>";
         echo "<td>".(isset($trace[$i+1]["function"]) ? $trace[$i+1]["function"] : "-")."</td>";
         echo "<td>".(isset($trace[$i+1]["class"]) && isset($te_loaded_classes[$trace[$i+1]["class"]]) ? $te_loaded_classes[$trace[$i+1]["class"]] : "-")."</td>";
