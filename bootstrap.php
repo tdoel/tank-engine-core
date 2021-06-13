@@ -34,6 +34,11 @@ function te_exception_handler($exception)
     $line = $exception->getLine();
 
     echo "<p>Uncaught exception [$code]: $msg in <b>$file</b> on line <b>$line</b>.</p>";
+
+    if($exception instanceof te_runtime_exception)
+    {
+      $exception->print_stacktrace();
+    }
   }
   while ($exception = $exception->getPrevious());
 }
@@ -135,9 +140,16 @@ function te_file_exists($file)
   return false;
 }
 
+//a list of all loaded classes, that holds whether the $framework or application
+//version was loaded. Used by the general exception handler for making the
+//stack trace more insightful.
+$te_loaded_classes = [];
+
 //autoloader for classes
 function te_autoload($class_name)
 {
+  global $te_loaded_classes;
+
   //all file names are lowercase
   $class_name = strtolower($class_name);
 
@@ -170,6 +182,10 @@ function te_autoload($class_name)
   if(file_exists($path))
   {
     require_once $path;
+
+    //register class as 'application version loaded'
+    $te_loaded_classes[$class_name] = "application";
+
     //call static constructor if available
     $call = $class_name."::__construct_static";
     if (is_callable($call))
@@ -184,6 +200,10 @@ function te_autoload($class_name)
   if(file_exists($path))
   {
     require_once $path;
+
+    //regiser class as 'framework version loaded'
+    $te_loaded_classes[$class_name] = "framework";
+
     //call static constructor if available
     $call = $class_name."::__construct_static";
     if (is_callable($call))
