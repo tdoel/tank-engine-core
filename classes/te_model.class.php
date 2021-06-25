@@ -31,6 +31,20 @@ class te_model
   /* PUBLIC METHODS */
   public function save()
   {
+    //save children first
+    foreach($this->get_children() as $child)
+    {
+      // only save children if this is an insert, or if the dependent flag is
+      // specified
+      if(!isset($this->id) || $child->is_dependent())
+      {
+        $this->{$child->get_fieldname()}->save();
+      }
+      //$fname = $child->get_fieldname();
+      //$this->{$child->get_fieldname()}->save();
+      //$this->$fname->save();
+    }
+
     if(isset($this->id))
     {
       //update existing record in database
@@ -90,12 +104,24 @@ class te_model
             {
               //id defined, save id to object
               $this->$fieldname_id = $construction_array[$fieldname_id];
+              if($field->is_polymorphic())
+              {
+                $this->{$fieldname."_type"} = $construction_array[$fieldname."_type"];
+              }
             }
             else
             {
               //not defined, so create a new child
-              $datatype = $field->get_datatype();
-              $this->$fieldname = new $datatype();
+              if($field->is_polymorphic())
+              {
+                //polymorphic, so a child cannot be defined yet
+                $this->$fieldname = null;
+              }
+              else
+              {
+                $datatype = $field->get_datatype();
+                $this->$fieldname = new $datatype();
+              }
             }
             break;
           case "has_one":
@@ -263,6 +289,13 @@ class te_model
   /* MAGIC METHODS */
   public function __get($field)
   {
+    if($field == "id")
+    {
+      // this field should always be defined if it is available, so it cannot
+      // be retrieved via a magic method. This is triggered by isset()
+      // statements for example.
+      return null;
+    }
     $obfield = static::get_ob_fields()[$field];
     switch($obfield->get_association())
     {
@@ -273,7 +306,14 @@ class te_model
           //id is known
           $id = $this->$field_id;
         }
-        $classname = $obfield->get_datatype();
+        if($obfield->is_polymorphic())
+        {
+          $classname = $this->{$obfield->get_fieldname()."_type"};
+        }
+        else
+        {
+          $classname = $obfield->get_datatype();
+        }
         $this->$field = new $classname($id);
         return $this->$field;
         break;
@@ -360,14 +400,16 @@ class te_model
       return false;
     }
   }
+
   private static function create_table()
   {
     //creates a table for this model
     $sql = "CREATE TABLE " . static::$table_name . " (";
     $sql .= "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,";
-    foreach(static::$fields as $field => $fieldinfo)
+
+    foreach(static::get_db_columns() as $field => $datatype)
     {
-      $sql .= $field . " " . $fieldinfo["datatype"] . ",";
+      $sql .= $field . " " . $datatype . ",";
     }
     $sql = substr($sql,0,-1) . ")";
     static::$conn->query($sql);
@@ -456,21 +498,54 @@ class te_model
   private function get_assoc_array()
   {
     $array = [];
+    foreach(static::get_ob_fields() as $fieldname => $field)
+    {
+      $array = array_merge($array, $field->get_assoc_array($this->$fieldname));
+    }
+    /*
     foreach(static::$fields as $field => $fieldinfo)
     {
       if($this->is_field_model($field))
       {
+        if($this->get_field_object($field)->is_polymorphic())
+        {
+          $array[$field."_type"] = get_class($this->$field);
+        }
         $array[$field."_id"] = $this->$field->id;
       }
       else
       {
         $array[$field] = $this->$field;
       }
-    }
+    }*/
     return $array;
   }
   private function is_field_model($column_name) //FIXME: should be static
   {
     return isset(static::get_ob_fields()[$column_name]) ? (static::get_ob_fields()[$column_name]->is_model()) : false;
+  }
+  private function get_field_object($column_name)
+  {
+    if(isset(static::get_ob_fields()[$column_name]))
+    {
+      return static::get_ob_fields()[$column_name];
+    }
+    else
+    {
+      throw te_runtime_warning("Field object '".$column_name."' requested but it does not exist.");
+    }
+  }
+  //return the children of this instance (has_one associations)
+  private function get_children()
+  {
+    $children = [];
+    foreach(static::get_ob_fields() as $obfield)
+    {
+      if($obfield->get_association() == "belongs_to")
+      {
+        $children[] = $obfield;
+      }
+    }
+    return $children;
   }
 }
