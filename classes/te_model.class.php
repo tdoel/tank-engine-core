@@ -104,9 +104,6 @@ class te_model
         throw new te_runtime_error("Attempted to generate '".get_called_class()."' from ID = '".$construction."', but a record with this ID does not exist");
       }
       $construction_array = array_merge($construction_array,$db_object);
-
-      //assign id to self, to indicate that         the object exists in database
-      $this->id = $construction;
     }
     else if(is_array($construction))
     {
@@ -169,6 +166,13 @@ class te_model
           $this->$fieldname = 0;
         }
       }
+    }
+
+    //add the ID if it is specified / available
+    if(isset($construction_array["id"]))
+    {
+      //assign id to self, to indicate that the object exists in database
+      $this->id = $construction_array["id"];
     }
   }
   public static function __construct_static()
