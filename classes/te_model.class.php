@@ -61,6 +61,31 @@ class te_model
   {
     static::delete(array("id" => $this->id));
   }
+  public static function get($where = [])
+  {
+    $sql = "SELECT * FROM ".static::$table_name;
+
+    $sql_where = "";
+    $params = [];
+    foreach($where as $colname => $value)
+    {
+      $sql_where .= $colname."=:".$colname." AND ";
+      $params[$colname] = $value;
+    }
+    if($sql_where != "")
+    {
+      $sql_where = "WHERE ".substr($sql_where,0,-5);
+    }
+    $sql .= " " . $sql_where;
+
+    $array = static::get_results($sql, $params);
+
+    return static::get_ob_list($array);
+  }
+  public static function get_all()
+  {
+    return static::get();
+  }
 
   /* CONSTRUCTORS */
   public function __construct($construction = null)
