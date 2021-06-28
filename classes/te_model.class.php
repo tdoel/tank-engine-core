@@ -330,7 +330,7 @@ class te_model
         $foreign_table = $obfield->get_foreign_table();
         $classname = $obfield->get_datatype();
         $items = static::get_results("SELECT * FROM $foreign_table WHERE $foreign_key = :id", array("id" => $this->id));
-        return $this->get_ob_list($items, $classname);
+        return static::get_ob_list($items, $classname);
         break;
     }
   }
@@ -343,7 +343,7 @@ class te_model
 
   /* PROTECTED METHODS FOR INTERNAL USE */
   //get a list of objects from an associative array
-  protected function get_ob_list($array, $classname = null)
+  protected static function get_ob_list($array, $classname = null)
   {
     $objects = [];
     if ($classname == null)
