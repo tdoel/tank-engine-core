@@ -35,10 +35,37 @@ function te_exception_handler($exception)
 
     echo "<p>Uncaught exception [$code]: $msg in <b>$file</b> on line <b>$line</b>.</p>";
 
-    if($exception instanceof te_runtime_exception)
+    global $te_loaded_classes;
+    echo "<p>
+    <h4>Stacktrace</h4>
+    </p>
+    <style>td {padding-right: 10px;}</style>
+    <table><tr>
+    <td>File</td>
+    <td>Line</td>
+    <td>Class</td>
+    <td>Function</td>
+    <td>Class used</td>
+    </tr>";
+    $trace = $exception->getTrace();
+    for($i = -1; $i < count($trace); $i++)
     {
-      $exception->print_stacktrace();
+      if (isset($trace[$i+1]["class"]) && isset($te_loaded_classes[$trace[$i+1]["class"]]) && $te_loaded_classes[$trace[$i+1]["class"]] == "application")
+      {
+          echo '<tr style="font-weight:bold;">';
+      }
+      else
+      {
+        echo "<tr>";
+      }
+      echo "<td>".(isset($trace[$i]["file"]) ? $trace[$i]["file"] : ($i == -1 ? $exception->getFile() : "-"))."</td>";
+      echo "<td>".(isset($trace[$i]["line"]) ? $trace[$i]["line"] : ($i == -1 ? $exception->getLine() : "-"))."</td>";
+      echo "<td>".(isset($trace[$i+1]["class"]) ? $trace[$i+1]["class"] : "-")."</td>";
+      echo "<td>".(isset($trace[$i+1]["function"]) ? $trace[$i+1]["function"] : "-")."</td>";
+      echo "<td>".(isset($trace[$i+1]["class"]) && isset($te_loaded_classes[$trace[$i+1]["class"]]) ? $te_loaded_classes[$trace[$i+1]["class"]] : "-")."</td>";
+      echo "</tr>";
     }
+    echo "</table>";
   }
   while ($exception = $exception->getPrevious());
 }
