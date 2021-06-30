@@ -473,7 +473,7 @@ class te_model
       else if(!static::is_equal_datatypes($datatype, $db_columns_assoc[$column_name]))
       {
         //column exitsts, but its not the correct datatype
-        tank_engine::throw(ERROR,"The datatypes '".$datatype."' of field '".$column_name."' in '".get_called_class()."' and '".$db_columns_assoc[$column_name]."' in database table '".static::$table_name."' do not match");
+        throw new te_runtime_warning("The datatypes '".$datatype."' of field '".$column_name."' in '".get_called_class()."' and '".$db_columns_assoc[$column_name]."' in database table '".static::$table_name."' do not match");
       }
     }
 
